@@ -1,5 +1,6 @@
 package com.apitest.service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -64,10 +65,10 @@ public class EmployeeDaoService {
 	
 	public Employee getEmployeeById(Long empId) {
 		Optional<Employee> employee = employeeRepo.findById(empId);
-	    if(!employee.isPresent()) {
+	    if(employee.isPresent()) {
 	    	return employee.get();
 	    }else {
-	    	return employee.get();
+	    	return null;
 	    }
 	}
 	
@@ -78,5 +79,32 @@ public class EmployeeDaoService {
 			throw new ApiTestException("Error in deleting employee");
 		}
 		
+	}
+	
+	public List<EmployeeDto> searchEmployee(String searchTerm) {
+		List<Long> employeeids = employeeRepo.getEmployeeBySearch(searchTerm);
+		List<Employee> employees = new ArrayList<Employee>();
+		Employee employee;
+		for(Long empId : employeeids) {
+			employee = employeeRepo.findById(empId).get();
+			if(employee != null) {
+				employees.add(employee);
+			}
+			
+		}
+		
+		List<EmployeeDto> empDtos = new ArrayList<EmployeeDto>();
+		EmployeeDto empDto;
+		if(employees.size() > 0) {
+			for(Employee emp : employees) {
+				empDto = new EmployeeDto();
+				empDto.setEmployeeId(emp.getEmployeeId());
+				empDto.setEmployeeName(emp.getEmployeeName());
+				empDtos.add(empDto);
+			}
+			
+		}
+		
+		return empDtos;
 	}
 }

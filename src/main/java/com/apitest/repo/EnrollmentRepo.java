@@ -12,6 +12,6 @@ import com.apitest.entities.Enrollment;
 @Repository
 public interface EnrollmentRepo extends JpaRepository<Enrollment, Long>{
 
-	Enrollment findByEmployee(Employee employee);
+	List<Enrollment> findByEmployee(Employee employee);
 	List<Enrollment> findByCourse(Course course);
 }

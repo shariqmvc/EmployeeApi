@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -54,7 +55,7 @@ public class EmployeeController {
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(savedEmployee);
 	}
-
+	@PostMapping("/employee/enroll")
 	public ResponseEntity<Map<String, Object>> enrollEmployee(@RequestBody EmployeeDto employeeDto)
 			throws InvalidRelationIdException {
 		if (employeeDto.getEmployeeId() == null) {
@@ -79,26 +80,29 @@ public class EmployeeController {
 		}
 
 		// logic to check if already enrolled. //Can opt for mutiple courses to be confirmed
-		Enrollment alreadyEnrolled = enrollmentRepo.findByEmployee(employee);
+		List<Enrollment> alreadyEnrolled = enrollmentRepo.findByEmployee(employee);
 		List<String> weekDays = new ArrayList<String>();
-		if (alreadyEnrolled != null) {
+		for(Enrollment enrollment : alreadyEnrolled) {
+			if (enrollment != null) {
 
-			if (alreadyEnrolled.getWeekDays().split(",").length > 1) {
-				weekDays = Arrays.asList(alreadyEnrolled.getWeekDays().split(","));
-			} else {
-				weekDays.add(alreadyEnrolled.getWeekDays());
-			}
+				if (enrollment.getWeekDays().split(",").length > 1) {
+					weekDays = Arrays.asList(enrollment.getWeekDays().split(","));
+				} else {
+					weekDays.add(enrollment.getWeekDays());
+				}
 
-			for (String exisitingWeekDay : weekDays) {
-				for (String weekDay : employeeDto.getWeekDays()) {
-					if (weekDay.equals(exisitingWeekDay)) {
-						throw new ApiTestException("Already enrolled with a course at this day");
+				for (String exisitingWeekDay : weekDays) {
+					for (String weekDay : employeeDto.getWeekDays()) {
+						if (weekDay.equals(exisitingWeekDay)) {
+							throw new ApiTestException("Already enrolled with a course at this day");
+						}
 					}
+
 				}
 
 			}
-
 		}
+		
 
 		Boolean newEnrollment = employeeDaoService.enrollEmployee(course, employee, employeeDto.getWeekDays());
 
@@ -144,6 +148,22 @@ public class EmployeeController {
 
 		return ok(model);
 	}
+	@GetMapping("/employee/{searchTerm}")
+	public ResponseEntity<?> searchEmployee(@PathVariable("searchTerm") String searchTerm) throws InvalidRelationIdException {
+		if (searchTerm == null || searchTerm.isEmpty()) {
+			throw new InvalidRelationIdException("searchTerm is missing");
+		}
+
+		List<EmployeeDto> fetchedEmployees = employeeDaoService.searchEmployee(searchTerm);
+
+		Map<String, Object> model = new HashMap<>();
+		model.put("statusDetails", "Found " +fetchedEmployees.size()+ " employees");
+		model.put("success", "true");
+		model.put("employees", fetchedEmployees);
+
+		return ok(model);
+	}
+	
 	
 
 }

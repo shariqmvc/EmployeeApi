@@ -66,10 +66,10 @@ public class CourseDaoService {
 	
 	public Course getCourseByNo(Long courseNo) {
 		Optional<Course> course = courseRepo.findById(courseNo);
-	    if(!course.isPresent()) {
+	    if(course.isPresent()) {
 	    	return course.get();
 	    }else {
-	    	return course.get();
+	    	return null;
 	    }
 	}
 	
