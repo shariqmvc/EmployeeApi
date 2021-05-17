@@ -165,7 +165,7 @@ public class EmployeeController {
 		return ok(model);
 	}
 	
-	@GetMapping("/employee/{employeeId}/{courseNo}")
+	@GetMapping("/employee/remove/{employeeId}/{courseNo}")
 	public ResponseEntity<?> removeEnrollment(@PathVariable("employeeId") Long employeeId, @PathVariable("courseNo") Long courseNo) throws InvalidRelationIdException {
 		
 		Employee employee = employeeDaoService.getEmployeeById(employeeId);
@@ -182,6 +182,29 @@ public class EmployeeController {
 		Boolean status = employeeDaoService.removeEmployeeFromCourse(course, employee);
 		Map<String, Object> model = new HashMap<>();
 		model.put("statusDetails", "Successfully removed");
+		model.put("success", status);
+	
+		return ok(model);
+	}
+	
+	
+	@GetMapping("/employee/suspend/{employeeId}/{courseNo}")
+	public ResponseEntity<?> suspendEnrollment(@PathVariable("employeeId") Long employeeId, @PathVariable("courseNo") Long courseNo) throws InvalidRelationIdException {
+		
+		Employee employee = employeeDaoService.getEmployeeById(employeeId);
+		if(employee == null) {
+			throw new ResourceNotFoundException("Invalid Employee Id");
+		}
+		
+		Course course = courseDaoService.getCourseByNo(courseNo);
+		if(course == null) {
+			throw new ResourceNotFoundException("Invalid Course no");
+		}
+		
+		
+		Boolean status = employeeDaoService.suspendCourse(course, employee);
+		Map<String, Object> model = new HashMap<>();
+		model.put("statusDetails", "Successfully suspended");
 		model.put("success", status);
 	
 		return ok(model);
