@@ -7,10 +7,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.management.relation.InvalidRelationIdException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -102,4 +105,19 @@ public class CourseController {
 		return ok(model);
 	}
 	
+	@GetMapping("/Course/{searchTerm}")
+	public ResponseEntity<?> searchCourse(@PathVariable("searchTerm") String searchTerm) throws InvalidRelationIdException {
+		if (searchTerm == null || searchTerm.isEmpty()) {
+			throw new InvalidRelationIdException("searchTerm is missing");
+		}
+
+		List<Course> Courses = courseDaoService.getCoursesByKeyword(searchTerm);
+
+		Map<String, Object> model = new HashMap<>();
+		model.put("statusDetails", "Found " +Courses.size()+ " Courses");
+		model.put("success", "true");
+		model.put("Courses", Courses);
+
+		return ok(model);
+	}
 }

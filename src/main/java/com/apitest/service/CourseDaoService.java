@@ -14,6 +14,7 @@ import com.apitest.entities.Enrollment;
 import com.apitest.entities.WeekDayMapping;
 import com.apitest.exception.ApiTestException;
 import com.apitest.model.CourseDto;
+import com.apitest.model.Status;
 import com.apitest.repo.CourseRepo;
 import com.apitest.repo.EnrollmentRepo;
 import com.apitest.repo.WeekDayMapRepo;
@@ -33,7 +34,7 @@ public class CourseDaoService {
 	   Course course = new Course();
 	   course.setCourseName(courseDto.getCourseName());
 	   course.setCreatedAt(new Date());
-	   course.setStatus("active");
+	   course.setStatus(Status.Active.name());
 	   
 	   Course savedCourse;
 	   try {
@@ -94,5 +95,15 @@ public class CourseDaoService {
 		}
 		
 		return employeeList;
+	}
+	
+	public List<Course> getCoursesByKeyword(String searchTerm){
+		List<Course> courseList = new ArrayList<Course>();
+		List<Long> courseNos = courseRepo.getCourseBySearch(searchTerm);
+		for(Long courseNo : courseNos) {
+			courseList.add(getCourseByNo(courseNo));
+		}
+		
+		return courseList;
 	}
 }

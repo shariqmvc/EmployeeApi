@@ -12,7 +12,9 @@ import com.apitest.entities.Course;
 import com.apitest.entities.Employee;
 import com.apitest.entities.Enrollment;
 import com.apitest.exception.ApiTestException;
+import com.apitest.exception.ResourceNotFoundException;
 import com.apitest.model.EmployeeDto;
+import com.apitest.model.Status;
 import com.apitest.repo.EmployeeRepo;
 import com.apitest.repo.EnrollmentRepo;
 
@@ -29,9 +31,10 @@ public class EmployeeDaoService {
 		Employee emp = new Employee();
 		emp.setEmployeeName(empDto.getEmployeeName());
 		emp.setCreatedAt(new Date());
-		emp.setStatus("acive");
+		emp.setStatus(Status.Active.name());
 		
 		Employee savedEmp;
+		
 		try {
 			savedEmp = employeeRepo.save(emp);
 		}catch(Exception exc) {
@@ -54,6 +57,7 @@ public class EmployeeDaoService {
 		enroll.setEmployee(employee);
 		String weekDaysStr = weekDays.toString().replace(", ", ",").replaceAll("[\\[.\\]]", "");
 		enroll.setWeekDays(weekDaysStr);
+		enroll.setStatus(Status.Active.name());
 		Enrollment createdEnrollment = enrollmentRepo.save(enroll);
 		if(createdEnrollment == null) {
 			flag = false;
@@ -107,4 +111,36 @@ public class EmployeeDaoService {
 		
 		return empDtos;
 	}
+	
+	public Boolean removeEmployeeFromCourse(Course course, Employee employee) {
+		Enrollment enrollment = enrollmentRepo.findByEmployeeAndCourse(employee, course);
+		if(enrollment == null) {
+			throw new ResourceNotFoundException("No such enrollment found");
+		}
+		
+		try {
+			enrollmentRepo.delete(enrollment);
+		}catch(Exception exc) {
+			throw new ApiTestException("Unable to delete enrollment");
+		}
+		
+		return true;
+	}
+	
+	public Boolean suspendCourse(Course course, Employee employee) {
+		Enrollment enrollment = enrollmentRepo.findByEmployeeAndCourse(employee, course);
+		if(enrollment == null) {
+			throw new ResourceNotFoundException("No such enrollment found");
+		}
+		
+		try {
+			enrollment.setStatus(Status.Suspended.name());
+			enrollmentRepo.save(enrollment);
+		}catch(Exception exc) {
+			throw new ApiTestException("Unable to suspend course");
+		}
+		
+		return true;
+	}
+	
 }

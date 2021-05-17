@@ -13,7 +13,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>API-test</name>
-	<description>Demo Mongo Repo</description>
+	<description>Demo</description>
 	<properties>
 		<java.version>11</java.version>
 	</properties>

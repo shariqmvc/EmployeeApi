@@ -27,6 +27,7 @@ import com.apitest.entities.Enrollment;
 import com.apitest.exception.ApiTestException;
 import com.apitest.exception.ResourceNotFoundException;
 import com.apitest.model.EmployeeDto;
+import com.apitest.repo.EmployeeRepo;
 import com.apitest.repo.EnrollmentRepo;
 import com.apitest.service.CourseDaoService;
 import com.apitest.service.EmployeeDaoService;
@@ -161,6 +162,28 @@ public class EmployeeController {
 		model.put("success", "true");
 		model.put("employees", fetchedEmployees);
 
+		return ok(model);
+	}
+	
+	@GetMapping("/employee/{employeeId}/{courseNo}")
+	public ResponseEntity<?> removeEnrollment(@PathVariable("employeeId") Long employeeId, @PathVariable("courseNo") Long courseNo) throws InvalidRelationIdException {
+		
+		Employee employee = employeeDaoService.getEmployeeById(employeeId);
+		if(employee == null) {
+			throw new ResourceNotFoundException("Invalid Employee Id");
+		}
+		
+		Course course = courseDaoService.getCourseByNo(courseNo);
+		if(course == null) {
+			throw new ResourceNotFoundException("Invalid Course no");
+		}
+		
+		
+		Boolean status = employeeDaoService.removeEmployeeFromCourse(course, employee);
+		Map<String, Object> model = new HashMap<>();
+		model.put("statusDetails", "Successfully removed");
+		model.put("success", status);
+	
 		return ok(model);
 	}
 	
